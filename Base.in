@@ -1,0 +1,29 @@
+
+#title: Roots under Hete Soil Imaging
+
+Configuration
+#domain: 3.200 1.700 3.200
+#dx_dy_dz: 0.005 0.005 0.005
+#time_window: 3e-08
+Source - Receiver - Waveform
+#waveform: ricker 1 1e9 my_wave
+
+#pml_cells: 20 20 20 20 20 20
+#soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
+#material: 5.24 0.001 1 0 confined_material
+#box: 0.100 1.000 0.100 3.100 1.150 3.100 confined_material
+
+#python:
+cavity_coord = []
+import numpy as np
+
+cavity_coord = np.loadtxt('points_coord.txt')
+
+cav_x, cav_y, cav_z = cavity_coord[current_model_run-1]
+from user_libs.antennas.MALA_5mm import antenna_like_MALA_1200
+antenna_like_MALA_1200(cav_x, cav_y, cav_z, resolution=0.005)
+#end_python:
+#fractal_box: 0.100 0.100 0.100 3.100 1.000 3.100 1.5 1 1 1 20 hete_soil my_fractal_box 42
+geometry_view: 0 0 0 3.200 1.700 3.200 0.005 0.005 0.005 Base n
+
+        

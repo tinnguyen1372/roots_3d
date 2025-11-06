@@ -15,10 +15,10 @@ userlibdir = os.path.dirname(os.path.abspath(__file__))
 def antenna_like_MALA_1200(x, y, z, resolution=0.005, rotate90=False):
     #Antenna geometry properties (adapted for 5mm resolution only)
     casesize = (0.184, 0.109, 0.040)
-    casethickness = 0.002
+    casethickness = 0.005
     cavitysize = (0.062, 0.062, 0.037)
     cavitythickness = 0.005
-    pcbthickness = 0.002
+    pcbthickness = 0.005
     polypropylenethickness = 0.005
     hdpethickness = 0.005
     skidthickness = 0.006
@@ -30,7 +30,7 @@ def antenna_like_MALA_1200(x, y, z, resolution=0.005, rotate90=False):
     else:
         rotate90origin = ()
         output = 'Ey'  
-    excitationfreq = 2e9
+    excitationfreq = 0.6e9
     sourceresistance = 1000
     absorberEr = 6.49
     absorbersig = 0.252

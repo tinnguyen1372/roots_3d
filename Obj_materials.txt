@@ -1,2 +1,0 @@
-#material: 5.04 0.001 1 0 wall
-#material: 1 42628946.885311 1 0 Object0

@@ -1,0 +1,2 @@
+#material: 24 0.0002 1 0 Object0
+#material: 24 0.0002 1 0 Object1

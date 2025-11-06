@@ -16,6 +16,16 @@ Classifier: Topic :: Scientific/Engineering
 Requires-Python: >3.6
 Description-Content-Type: text/x-rst
 License-File: LICENSE
+Requires-Dist: colorama
+Requires-Dist: cython
+Requires-Dist: h5py
+Requires-Dist: jupyter
+Requires-Dist: matplotlib
+Requires-Dist: numpy
+Requires-Dist: psutil
+Requires-Dist: scipy
+Requires-Dist: terminaltables
+Requires-Dist: tqdm
 
 .. image:: https://readthedocs.org/projects/gprmax/badge/?version=latest
     :target: http://docs.gprmax.com/en/latest/?badge=latest
