@@ -115,7 +115,7 @@ elif selected_index == 3:
                 f.close()
             api(self.input, 
                 n=int(self.num_scan/4), 
-                # gpu=[self.gpu],
+                gpu=[0],
                 geometry_only=False, geometry_fixed=False)
             merge_files(self.input)
             data_quarter = get_output_data(self.input)
