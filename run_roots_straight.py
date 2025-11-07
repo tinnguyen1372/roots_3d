@@ -117,20 +117,21 @@ elif selected_index == 3:
                 n=int(self.num_scan/4), 
                 gpu=[0],
                 geometry_only=False, geometry_fixed=False)
-            merge_files(self.input)
-            data_quarter = get_output_data(self.input)
+            # merge_files(self.input)
+            # data_quarter = get_output_data(self.input)
             # bscan = mpl_plot_Bscan(data, self.resol)
-            # ascan = mpl_plot_Ascan(data, self.resol)
+            # ascan = mpl_plot_Ascan(dat
+            # a, self.resol)
             # return bscan, ascan
-            data.append(data_quarter)
+            # data.append(data_quarter)
         # INSERT_YOUR_CODE
         # Merge the 4 data_quarter (assumed to be numpy arrays or similar)
         # import numpy as np
-        merged_data = np.concatenate(data, axis=0)
+        # merged_data = np.concatenate(data, axis=0)
 
-        plt.imshow(merged_data, cmap='gray', aspect='auto')
-        plt.savefig('merged_data.png')
-        plt.close()
+        # plt.imshow(merged_data, cmap='gray', aspect='auto')
+        # plt.savefig('merged_data.png')
+        # plt.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Roots Scanning for Through Imaging")      
