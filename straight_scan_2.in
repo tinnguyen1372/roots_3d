@@ -1,0 +1,45 @@
+
+#title: Roots under Hete Soil Imaging
+
+Configuration
+#domain: 3.200 1.700 3.200
+#dx_dy_dz: 0.005 0.005 0.005
+#time_window: 3e-08
+
+#pml_cells: 20 20 20 20 20 20
+
+Environment
+#soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
+#fractal_box: 0.100 0.100 0.100 3.100 1.000 3.100 1.5 1 1 1 20 hete_soil my_fractal_box 42
+#material: 5.24 0.001 1 0 confined_material
+#box: 0.100 1.000 0.100 3.100 1.150 3.100 confined_material
+
+#python:
+selected_index = int('0') 
+from gprMax.input_cmd_funcs import *
+
+starting_point_tx = [(1,1.1,1), (1,1.1,2) , (2,1.1,2) , (2,1.1,1)]
+starting_point_rx = [(1,1.1,0.9), (0.9,1.1,2) , (2,1.1,2.1) , (2.1,1.1,1)]
+num_scan = 80
+waveform('gaussian', 1, 5e8, 'my_gaussian')
+hertzian_dipole('y', starting_point_tx[selected_index][0], starting_point_tx[selected_index][1], starting_point_tx[selected_index][2], 'my_gaussian') 
+rx(
+    starting_point_rx[selected_index][0],
+    starting_point_rx[selected_index][1],
+    starting_point_rx[selected_index][2],
+)
+if selected_index == 0:
+    src_steps(dx=0, dy=0, dz=1/number_model_runs)
+    rx_steps(dx=0, dy=0, dz=1/number_model_runs)
+elif selected_index == 1:
+    src_steps(dx=1/number_model_runs, dy=0, dz=0)
+    rx_steps(dx=1/number_model_runs, dy=0, dz=0)
+elif selected_index == 2:
+    src_steps(dx=0, dy=0, dz=-1/number_model_runs)
+    rx_steps(dx=0, dy=0, dz=-1/number_model_runs)
+elif selected_index == 3:
+    src_steps(dx=-1/number_model_runs, dy=0, dz=0)
+    rx_steps(dx=-1/number_model_runs, dy=0, dz=0)
+#end_python:
+#geometry_objects_read: 0.600 0.100 0.600 test.h5 Object_materials.txt
+

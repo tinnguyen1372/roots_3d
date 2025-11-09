@@ -22,7 +22,7 @@ class Roots_Func():
     def __init__(self, args) -> None:
         self.gpu = getattr(args, 'gpu', 0)
 
-        self.num_scan = getattr(args, 'num_scan', 51)
+        self.num_scan = getattr(args, 'num_scan', 80)
         self.resol = getattr(args, 'resol', 0.005)
         self.time_window = getattr(args, 'time_window', 30e-9)
 
@@ -60,7 +60,11 @@ class Roots_Func():
             for i in range(len(self.roots_permittivity)):
                 f.write('#material: {} {} 1 0 Object{}\n'.format(self.roots_permittivity[i], self.roots_conductivity[i], i))
             f.close()
-        config = f'''
+
+        data = []
+        for quarter in range(4):
+            self.input = f'straight_scan_{quarter+1}.in'
+            config = f'''
 #title: Roots under Hete Soil Imaging
 
 Configuration
@@ -77,12 +81,11 @@ Environment
 #box: {pml:.3f} {1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.15:.3f} {domain_3d[2] - pml:.3f} confined_material
 
 #python:
-selected_index = int('tobereplaced') 
+selected_index = int({quarter}) 
 from gprMax.input_cmd_funcs import *
 
 starting_point_tx = [(1,{1+ self.src_to_gnd},1), (1,{1+ self.src_to_gnd},2) , (2,{1+ self.src_to_gnd},2) , (2,{1+ self.src_to_gnd},1)]
 starting_point_rx = [(1,{1+ self.src_to_gnd},{1 - self.src_to_rx}), ({1 - self.src_to_rx},{1+ self.src_to_gnd},2) , (2,{1+ self.src_to_gnd},{2 + self.src_to_rx}) , ({2 + self.src_to_rx},{1+ self.src_to_gnd},1)]
-num_scan = 80
 waveform('gaussian', 1, 5e8, 'my_gaussian')
 hertzian_dipole('y', starting_point_tx[selected_index][0], starting_point_tx[selected_index][1], starting_point_tx[selected_index][2], 'my_gaussian') 
 rx(
@@ -105,11 +108,7 @@ elif selected_index == 3:
 #end_python:
 #geometry_objects_read: {(domain_3d[0]/2 - self.x/2) :.3f} {domain_3d[1]/2 - self.y/2 - 0.25:.3f} {(domain_3d[2]/2 - self.z/2):.3f} {self.h5_file} Object_materials.txt
 
-'''     
-        data = []
-        for quarter in range(4):
-            self.input = f'straight_scan_{quarter+1}.in'
-            config = config.replace('tobereplaced', f'{quarter}')
+    '''     
             with open(self.input, 'w') as f:
                 f.write(config)
                 f.close()
