@@ -22,7 +22,7 @@ class Roots_Func():
     def __init__(self, args) -> None:
         self.gpu = getattr(args, 'gpu', 0)
 
-        self.num_scan = getattr(args, 'num_scan', 80)
+        self.num_scan = getattr(args, 'num_scan', 72)
         self.resol = getattr(args, 'resol', 0.005)
         self.time_window = getattr(args, 'time_window', 30e-9)
 
@@ -43,8 +43,8 @@ class Roots_Func():
 
         self.fractal_box_seed = getattr(args, 'fractal_box_seed', 42) # random_randint(0,100)
 
-    def run_straight_scan(self):
-        self.input = 'straight_scan.in'
+    def run_circular_scan(self):
+        self.input = 'circular_scan.in'
         pml_cells = 20
         pml = self.resol * pml_cells
         src_to_pml = 0.05
@@ -60,6 +60,9 @@ class Roots_Func():
             for i in range(len(self.roots_permittivity)):
                 f.write('#material: {} {} 1 0 Object{}\n'.format(self.roots_permittivity[i], self.roots_conductivity[i], i))
             f.close()
+
+        data = []
+        self.input = f'circular_scan.in'
         config = f'''
 #title: Roots under Hete Soil Imaging
 
@@ -77,46 +80,41 @@ Environment
 #box: {pml:.3f} {1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.15:.3f} {domain_3d[2] - pml:.3f} confined_material
 
 #python:
-selected_index = int('tobereplaced') 
-from gprMax.input_cmd_funcs import *
 
-starting_point_tx = [(1,{1+ self.src_to_gnd},1), (1,{1+ self.src_to_gnd},2) , (2,{1+ self.src_to_gnd},2) , (2,{1+ self.src_to_gnd},1)]
-starting_point_rx = [(1,{1+ self.src_to_gnd},{1 - self.src_to_rx}), ({1 - self.src_to_rx},{1+ self.src_to_gnd},2) , (2,{1+ self.src_to_gnd},{2 + self.src_to_rx}) , ({2 + self.src_to_rx},{1+ self.src_to_gnd},1)]
-num_scan = 80
+r = 1.5         # radius
+delta = 0.005   # grid resolution
+theta = np.linspace(0, 2*np.pi, number_model_runs+1)
+
+# continuous circle
+x = r * np.cos(theta)
+y = r * np.sin(theta)
+
+# quantized coordinates
+xq = np.round(x / delta) * delta
+yq = np.round(y / delta) * delta
+
+# remove duplicates (optional)
+points = np.unique(np.column_stack((xq, yq)), axis=0)
+
+from gprMax.input_cmd_funcs import *
 waveform('gaussian', 1, 5e8, 'my_gaussian')
-hertzian_dipole('y', starting_point_tx[selected_index][0], starting_point_tx[selected_index][1], starting_point_tx[selected_index][2], 'my_gaussian') 
+hertzian_dipole('y', points[current_model_run-1][0], 1.25, points[current_model_run-1][1], 'my_gaussian') 
 rx(
-    starting_point_rx[selected_index][0],
-    starting_point_rx[selected_index][1],
-    starting_point_rx[selected_index][2],
+    points[current_model_run-2][0],
+    1.25,
+    points[current_model_run-2][1]
 )
-if selected_index == 0:
-    src_steps(dx=0, dy=0, dz=1/number_model_runs)
-    rx_steps(dx=0, dy=0, dz=1/number_model_runs)
-elif selected_index == 1:
-    src_steps(dx=1/number_model_runs, dy=0, dz=0)
-    rx_steps(dx=1/number_model_runs, dy=0, dz=0)
-elif selected_index == 2:
-    src_steps(dx=0, dy=0, dz=-1/number_model_runs)
-    rx_steps(dx=0, dy=0, dz=-1/number_model_runs)
-elif selected_index == 3:
-    src_steps(dx=-1/number_model_runs, dy=0, dz=0)
-    rx_steps(dx=-1/number_model_runs, dy=0, dz=0)
 #end_python:
 #geometry_objects_read: {(domain_3d[0]/2 - self.x/2) :.3f} {domain_3d[1]/2 - self.y/2 - 0.25:.3f} {(domain_3d[2]/2 - self.z/2):.3f} {self.h5_file} Object_materials.txt
 
-'''     
-        data = []
-        for quarter in range(4):
-            self.input = f'straight_scan_{quarter+1}.in'
-            config = config.replace('tobereplaced', f'{quarter}')
-            with open(self.input, 'w') as f:
-                f.write(config)
-                f.close()
-            api(self.input, 
-                n=int(self.num_scan/4), 
-                gpu=[0],
-                geometry_only=False, geometry_fixed=False)
+    '''     
+        with open(self.input, 'w') as f:
+            f.write(config)
+            f.close()
+        api(self.input, 
+            n=int(self.num_scan), 
+            gpu=[0],
+            geometry_only=False, geometry_fixed=False)
             # merge_files(self.input)
             # data_quarter = get_output_data(self.input)
             # bscan = mpl_plot_Bscan(data, self.resol)
@@ -137,8 +135,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Roots Scanning for Through Imaging")      
     parser.add_argument('--start', type=int, default=0, help='Start of the generated geometry')
     parser.add_argument('--end', type=int, default=1, help='End of the generated geometry')
-    parser.add_argument('--num_scan', type=int, default=80, help='Number of A-Scans')
+    parser.add_argument('--num_scan', type=int, default=72, help='Number of A-Scans')
 
     args = parser.parse_args()
     rootimg = Roots_Func(args=args)
-    rootimg.run_straight_scan()
+    rootimg.run_circular_scan()
