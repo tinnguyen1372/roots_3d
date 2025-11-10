@@ -80,7 +80,8 @@ Environment
 #box: {pml:.3f} {1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.15:.3f} {domain_3d[2] - pml:.3f} confined_material
 
 #python:
-
+from gprMax.input_cmd_funcs import *
+import numpy as np
 r = 1.5         # radius
 delta = 0.005   # grid resolution
 theta = np.linspace(0, 2*np.pi, number_model_runs+1)
@@ -96,7 +97,6 @@ yq = np.round(y / delta) * delta
 # remove duplicates (optional)
 points = np.unique(np.column_stack((xq, yq)), axis=0)
 
-from gprMax.input_cmd_funcs import *
 waveform('gaussian', 1, 5e8, 'my_gaussian')
 hertzian_dipole('y', points[current_model_run-1][0], 1.25, points[current_model_run-1][1], 'my_gaussian') 
 rx(
