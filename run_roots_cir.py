@@ -87,9 +87,10 @@ delta = 0.005   # grid resolution
 theta = np.linspace(0, 2*np.pi, number_model_runs+1)
 
 # continuous circle
-x = r * np.cos(theta)
-y = r * np.sin(theta)
-
+cx = 3.200 / 2
+cy = 3.200 / 2
+x = cx + r * np.cos(theta)
+y = cy + r * np.sin(theta)
 # quantized coordinates
 xq = np.round(x / delta) * delta
 yq = np.round(y / delta) * delta
