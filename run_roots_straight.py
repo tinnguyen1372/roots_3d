@@ -84,8 +84,8 @@ Environment
 selected_index = int({quarter}) 
 from gprMax.input_cmd_funcs import *
 
-starting_point_tx = [(1,{1+ self.src_to_gnd},1), (1,{1+ self.src_to_gnd},2) , (2,{1+ self.src_to_gnd},2) , (2,{1+ self.src_to_gnd},1)]
-starting_point_rx = [(1,{1+ self.src_to_gnd},{1 - self.src_to_rx}), ({1 - self.src_to_rx},{1+ self.src_to_gnd},2) , (2,{1+ self.src_to_gnd},{2 + self.src_to_rx}) , ({2 + self.src_to_rx},{1+ self.src_to_gnd},1)]
+starting_point_tx = [(1,{1.15+ self.src_to_gnd},1), (1,{1.15+ self.src_to_gnd},2) , (2,{1.15+ self.src_to_gnd},2) , (2,{1.15+ self.src_to_gnd},1)]
+starting_point_rx = [(1,{1.15+ self.src_to_gnd},{1 - self.src_to_rx}), ({1 - self.src_to_rx},{1.15+ self.src_to_gnd},2) , (2,{1.15+ self.src_to_gnd},{2 + self.src_to_rx}) , ({2 + self.src_to_rx},{1.15+ self.src_to_gnd},1)]
 waveform('gaussian', 1, 5e8, 'my_gaussian')
 hertzian_dipole('y', starting_point_tx[selected_index][0], starting_point_tx[selected_index][1], starting_point_tx[selected_index][2], 'my_gaussian') 
 rx(
