@@ -28,10 +28,10 @@ for output_file in output_files:
     else:
         # data1 = np.subtract(data1, data[:,:20])
         data = np.concatenate((data, data1), axis=1)
-# data1 = data1[2000:,:]
-# data = process_br(data)
+data = data[:,:]
+data = process_br(data)
 # data = np.subtract(data1,)
-plt = mpl_plot_Bscan("merged_outpu	t_data", data, dt,1,'Ey')
+plt = mpl_plot_Bscan("merged_output_data", data, dt,1,'Ey')
 import matplotlib.pyplot as plt
 fig_width = 8
 fig_height = 8

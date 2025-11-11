@@ -106,7 +106,7 @@ elif selected_index == 3:
     src_steps(dx=-1/number_model_runs, dy=0, dz=0)
     rx_steps(dx=-1/number_model_runs, dy=0, dz=0)
 #end_python:
-#geometry_objects_read: {(domain_3d[0]/2 - self.x/2) :.3f} {domain_3d[1]/2 - self.y/2 - 0.25:.3f} {(domain_3d[2]/2 - self.z/2):.3f} {self.h5_file} Object_materials.txt
+geometry_objects_read: {(domain_3d[0]/2 - self.x/2) :.3f} {domain_3d[1]/2 - self.y/2 - 0.25:.3f} {(domain_3d[2]/2 - self.z/2):.3f} {self.h5_file} Object_materials.txt
 
     '''     
             with open(self.input, 'w') as f:
