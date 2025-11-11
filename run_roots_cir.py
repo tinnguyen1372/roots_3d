@@ -82,7 +82,7 @@ Environment
 #python:
 from gprMax.input_cmd_funcs import *
 import numpy as np
-r = 1.5         # radius
+r = 1         # radius
 delta = 0.005   # grid resolution
 theta = np.linspace(0, 2*np.pi, number_model_runs+1)
 
@@ -95,8 +95,11 @@ y = cy + r * np.sin(theta)
 xq = np.round(x / delta) * delta
 yq = np.round(y / delta) * delta
 
-# remove duplicates (optional)
-points = np.unique(np.column_stack((xq, yq)), axis=0)
+# Remove duplicates (preserve order) and sort clockwise
+_, idx = np.unique(np.column_stack((xq, yq)), axis=0, return_index=True)
+points = np.column_stack((xq, yq))[np.sort(idx)]
+angles = np.arctan2(points[:,1] - cy, points[:,0] - cx)
+points = points[np.argsort(angles)]  # now clockwise
 
 waveform('gaussian', 1, 5e8, 'my_gaussian')
 hertzian_dipole('y', points[current_model_run-1][0], 1.25, points[current_model_run-1][1], 'my_gaussian') 
