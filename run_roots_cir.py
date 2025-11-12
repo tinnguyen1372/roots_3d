@@ -75,9 +75,9 @@ Configuration
 
 Environment
 #soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
-#fractal_box: {pml:.3f} {pml:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1:.3f} {domain_3d[2] - pml:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
+#fractal_box: {pml:.3f} {pml:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.1:.3f} {domain_3d[2] - pml:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
 #material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
-#box: {pml:.3f} {1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.15:.3f} {domain_3d[2] - pml:.3f} confined_material
+#box: {pml:.3f} {1.1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.25:.3f} {domain_3d[2] - pml:.3f} confined_material
 
 #python:
 from gprMax.input_cmd_funcs import *
@@ -102,10 +102,10 @@ angles = np.arctan2(points[:,1] - cy, points[:,0] - cx)
 points = points[np.argsort(angles)]  # now clockwise
 
 waveform('gaussian', 1, 5e8, 'my_gaussian')
-hertzian_dipole('y', points[current_model_run-1][0], 1.25, points[current_model_run-1][1], 'my_gaussian') 
+hertzian_dipole('y', points[current_model_run-1][0], 1.35, points[current_model_run-1][1], 'my_gaussian') 
 rx(
     points[current_model_run-2][0],
-    1.25,
+    1.35,
     points[current_model_run-2][1]
 )
 #end_python:

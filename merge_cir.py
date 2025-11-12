@@ -2,11 +2,11 @@ from tools.outputfiles_merge import merge_files
 import h5py
 from tools.plot_Bscan import get_output_data, mpl_plot as mpl_plot_Bscan 
 import numpy as np
-merge_files("./circular_scan/", removefiles=False)
+merge_files("./cir_scans/circular_scan", removefiles=False)
 # merge_files("./straight_scans/straight_scan_2", removefiles=False)
 # merge_files("./straight_scans/straight_scan_3", removefiles=False)
 # merge_files("./straight_scans/straight_scan_4", removefiles=False)
-output_files = ["./circular_scan/_merged.out"]
+output_files = ["./cir_scans/circular_scan_merged.out"]
 # merge_files("./Root3D/Base/Base", removefiles=False)
 # base_output_file = "./Root3D/Base/Base_merged.out"
 def process_br(raw_ra):
@@ -29,7 +29,7 @@ for output_file in output_files:
         # data1 = np.subtract(data1, data[:,:20])
         data = np.concatenate((data, data1), axis=1)
 # data1 = data1[2000:,:]
-data = process_br(data)
+# data = process_br(data)
 # data = np.subtract(data1,)
 plt = mpl_plot_Bscan("merged_output_data", data, dt,1,'Ey')
 import matplotlib.pyplot as plt

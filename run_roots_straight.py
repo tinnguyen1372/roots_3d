@@ -76,16 +76,16 @@ Configuration
 
 Environment
 #soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
-#fractal_box: {pml:.3f} {pml:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1:.3f} {domain_3d[2] - pml:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
+#fractal_box: {pml:.3f} {pml:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.1:.3f} {domain_3d[2] - pml:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
 #material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
-#box: {pml:.3f} {1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.15:.3f} {domain_3d[2] - pml:.3f} confined_material
+#box: {pml:.3f} {1.1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.25:.3f} {domain_3d[2] - pml:.3f} confined_material
 
 #python:
 selected_index = int({quarter}) 
 from gprMax.input_cmd_funcs import *
 
-starting_point_tx = [(1,{1.15+ self.src_to_gnd},1), (1,{1.15+ self.src_to_gnd},2) , (2,{1.15+ self.src_to_gnd},2) , (2,{1.15+ self.src_to_gnd},1)]
-starting_point_rx = [(1,{1.15+ self.src_to_gnd},{1 - self.src_to_rx}), ({1 - self.src_to_rx},{1.15+ self.src_to_gnd},2) , (2,{1.15+ self.src_to_gnd},{2 + self.src_to_rx}) , ({2 + self.src_to_rx},{1.15+ self.src_to_gnd},1)]
+starting_point_tx = [(1,{1.25+ self.src_to_gnd},1), (1,{1.25+ self.src_to_gnd},2) , (2,{1.25+ self.src_to_gnd},2) , (2,{1.25+ self.src_to_gnd},1)]
+starting_point_rx = [(1,{1.25+ self.src_to_gnd},{1 - self.src_to_rx}), ({1 - self.src_to_rx},{1.25+ self.src_to_gnd},2) , (2,{1.25+ self.src_to_gnd},{2 + self.src_to_rx}) , ({2 + self.src_to_rx},{1.25+ self.src_to_gnd},1)]
 waveform('gaussian', 1, 5e8, 'my_gaussian')
 hertzian_dipole('y', starting_point_tx[selected_index][0], starting_point_tx[selected_index][1], starting_point_tx[selected_index][2], 'my_gaussian') 
 rx(
