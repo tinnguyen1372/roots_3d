@@ -116,7 +116,7 @@ rx(
             f.close()
         api(self.input, 
             n=int(self.num_scan), 
-            # gpu=[0],
+            gpu=[0],
             geometry_only=False, geometry_fixed=False)
             # merge_files(self.input)
             # data_quarter = get_output_data(self.input)
