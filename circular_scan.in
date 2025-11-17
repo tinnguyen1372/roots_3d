@@ -1,0 +1,48 @@
+
+#title: Roots under Hete Soil Imaging
+
+Configuration
+#domain: 3.200 1.700 3.200
+#dx_dy_dz: 0.005 0.005 0.005
+#time_window: 3e-08
+
+#pml_cells: 20 20 20 20 20 20
+
+Environment
+#soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
+#fractal_box: 0.100 0.100 0.100 3.100 1.100 3.100 1.5 1 1 1 20 hete_soil my_fractal_box 42
+#material: 5.24 0.001 1 0 confined_material
+#box: 0.100 1.100 0.100 3.100 1.250 3.100 confined_material
+
+#python:
+from gprMax.input_cmd_funcs import *
+import numpy as np
+r = 1         # radius
+delta = 0.005   # grid resolution
+theta = np.linspace(0, 2*np.pi, number_model_runs+1)
+
+# continuous circle
+cx = 3.200 / 2
+cy = 3.200 / 2
+x = cx + r * np.cos(theta)
+y = cy + r * np.sin(theta)
+# quantized coordinates
+xq = np.round(x / delta) * delta
+yq = np.round(y / delta) * delta
+
+_, idx = np.unique(np.column_stack((xq, yq)), axis=0, return_index=True)
+points = np.column_stack((xq, yq))[np.sort(idx)]
+angles = np.arctan2(points[:,1] - cy, points[:,0] - cx)
+points = np.round(points[np.argsort(angles)], 3)  
+
+waveform('gaussian', 1, 5e8, 'my_gaussian')
+hertzian_dipole('y', points[current_model_run-1][0], 1.35, points[current_model_run-1][1], 'my_gaussian') 
+rx(
+    points[current_model_run-2][0],
+    1.35,
+    points[current_model_run-2][1]
+)
+#end_python:
+#geometry_objects_read: 0.600 0.100 0.600 test.h5 Object_materials.txt
+
+    

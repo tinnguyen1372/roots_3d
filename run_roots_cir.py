@@ -95,11 +95,10 @@ y = cy + r * np.sin(theta)
 xq = np.round(x / delta) * delta
 yq = np.round(y / delta) * delta
 
-# Remove duplicates (preserve order) and sort clockwise
 _, idx = np.unique(np.column_stack((xq, yq)), axis=0, return_index=True)
 points = np.column_stack((xq, yq))[np.sort(idx)]
 angles = np.arctan2(points[:,1] - cy, points[:,0] - cx)
-points = points[np.argsort(angles)]  # now clockwise
+points = np.round(points[np.argsort(angles)], 3)  
 
 waveform('gaussian', 1, 5e8, 'my_gaussian')
 hertzian_dipole('y', points[current_model_run-1][0], 1.35, points[current_model_run-1][1], 'my_gaussian') 
@@ -117,7 +116,7 @@ rx(
             f.close()
         api(self.input, 
             n=int(self.num_scan), 
-            gpu=[0],
+            # gpu=[0],
             geometry_only=False, geometry_fixed=False)
             # merge_files(self.input)
             # data_quarter = get_output_data(self.input)
@@ -139,7 +138,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Roots Scanning for Through Imaging")      
     parser.add_argument('--start', type=int, default=0, help='Start of the generated geometry')
     parser.add_argument('--end', type=int, default=1, help='End of the generated geometry')
-    parser.add_argument('--num_scan', type=int, default=72, help='Number of A-Scans')
+    parser.add_argument('--num_scan', type=int, default=5, help='Number of A-Scans')
 
     args = parser.parse_args()
     rootimg = Roots_Func(args=args)

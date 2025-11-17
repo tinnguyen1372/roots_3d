@@ -48,6 +48,7 @@ for noroot_output_file in noroot_output_files:
 # data = data[:,:]
 # data = process_br(data)
 data = np.subtract(data, noroot_data)
+
 # data = np.subtract(data1,)
 # plt = mpl_plot_Bscan("merged_output_data", noroot_data, dt,1,'Ey')
 # plt.show()
