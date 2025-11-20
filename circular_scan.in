@@ -10,7 +10,7 @@ Configuration
 
 Environment
 #soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
-#fractal_box: 0.100 0.100 0.100 3.100 1.100 3.100 1.5 1 1 1 20 hete_soil my_fractal_box 42
+fractal_box: 0.100 0.100 0.100 3.100 1.100 3.100 1.5 1 1 1 20 hete_soil my_fractal_box 42
 #material: 5.24 0.001 1 0 confined_material
 #box: 0.100 1.100 0.100 3.100 1.250 3.100 confined_material
 
@@ -35,6 +35,10 @@ points = np.column_stack((xq, yq))[np.sort(idx)]
 angles = np.arctan2(points[:,1] - cy, points[:,0] - cx)
 points = np.round(points[np.argsort(angles)], 3)  
 
+print(current_model_run)
+print(points[current_model_run-1])
+print(points[current_model_run-2])
+
 waveform('gaussian', 1, 5e8, 'my_gaussian')
 hertzian_dipole('y', points[current_model_run-1][0], 1.35, points[current_model_run-1][1], 'my_gaussian') 
 rx(
@@ -44,5 +48,5 @@ rx(
 )
 #end_python:
 #geometry_objects_read: 0.600 0.100 0.600 test.h5 Object_materials.txt
-
+#geometry_view: 0 0 0 3.200 1.700 3.200 0.005 0.005 0.005 CircularScan n
     

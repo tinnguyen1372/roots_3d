@@ -1,30 +1,34 @@
 import numpy as np
-r = 1         # radius
+
+input_number = int(input("Enter the number of model runs: "))
+# current_model_run = int(input("Enter the current model run: "))
+r_tx = 1         # radius
+r_rx = 1.10
 delta = 0.005   # grid resolution
-theta = np.linspace(0, 2*np.pi, 72+1)
+theta = np.linspace(0, 2*np.pi, input_number+1)
 
 # continuous circle
 cx = 3.200 / 2
 cy = 3.200 / 2
-x = cx + r * np.cos(theta)
-y = cy + r * np.sin(theta)
+x_tx = cx + r_tx * np.cos(theta)
+y_tx = cy + r_tx * np.sin(theta)
+
+x_rx = cx + r_rx * np.cos(theta)
+y_rx = cy + r_rx * np.sin(theta)
 # quantized coordinates
-xq = np.round(x / delta) * delta
-yq = np.round(y / delta) * delta
+xq_tx = np.round(x_tx / delta) * delta
+yq_tx = np.round(y_tx / delta) * delta
+xq_rx = np.round(x_rx / delta) * delta
+yq_rx = np.round(y_rx / delta) * delta
 
-# Remove duplicates (preserve order) and sort clockwise
-_, idx = np.unique(np.column_stack((xq, yq)), axis=0, return_index=True)
-points = np.column_stack((xq, yq))[np.sort(idx)]
-angles = np.arctan2(points[:,1] - cy, points[:,0] - cx)
-points = np.round(points[np.argsort(angles)], 3)  # now clockwise
-# INSERT_YOUR_CODE
-with open('points.txt', 'w') as f:
-    for pt in points:
-        f.write(f"{pt[0]:.3f}, {pt[1]:.3f}\n")
+_, idx = np.unique(np.column_stack((xq_tx, yq_tx)), axis=0, return_index=True)
+_, idx_rx = np.unique(np.column_stack((xq_rx, yq_rx)), axis=0, return_index=True)
+points_tx = np.column_stack((xq_tx, yq_tx))[np.sort(idx)]
+points_rx = np.column_stack((xq_rx, yq_rx))[np.sort(idx)]
+angles_tx = np.arctan2(points_tx[:,1] - cy, points_tx[:,0] - cx)
+angles_rx = np.arctan2(points_rx[:,1] - cy, points_rx[:,0] - cx)
+points_tx = np.round(points_tx[np.argsort(angles_tx)], 3)  
+points_rx = np.round(points_rx[np.argsort(angles_rx)], 3)  
 
-for current_model_run in range(1, 10):
-    # print(current_model_run)
-    # print("waveform('gaussian', 1, 5e8, 'my_gaussian')")
-    print(f"({points[current_model_run-1][0]}, {points[current_model_run-1][1]})")
-    print(f"({points[current_model_run-2][0]},{points[current_model_run-2][1]:.3f})")
-
+np.savetxt('points_tx.txt', points_tx, fmt='%.3f', delimiter=',')
+np.savetxt('points_rx.txt', points_rx, fmt='%.3f', delimiter=',')
