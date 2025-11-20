@@ -111,7 +111,7 @@ points_tx = np.round(points_tx[np.argsort(angles_tx)], 3)
 points_rx = np.round(points_rx[np.argsort(angles_rx)], 3)  
 
 waveform('gaussian', 1, 5e8, 'my_gaussian')
-hertzian_dipole('z', points_tx[current_model_run-1][0], 1.35, points_tx[current_model_run-1][1], 'my_gaussian') 
+hertzian_dipole('y', points_tx[current_model_run-1][0], 1.35, points_tx[current_model_run-1][1], 'my_gaussian') 
 rx(
     points_rx[current_model_run-1][0],
     1.35,
