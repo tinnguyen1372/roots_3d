@@ -24,7 +24,7 @@ class Roots_Func():
 
         self.num_scan = getattr(args, 'num_scan', 72)
         self.resol = getattr(args, 'resol', 0.005)
-        self.time_window = getattr(args, 'time_window', 30e-9)
+        self.time_window = getattr(args, 'time_window', 60e-9)
 
         # Geometry parameters
         self.h5_file = getattr(args, 'h5file', 'test.h5')
