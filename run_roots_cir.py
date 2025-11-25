@@ -104,7 +104,7 @@ yq_rx = np.round(y_rx / delta) * delta
 _, idx = np.unique(np.column_stack((xq_tx, yq_tx)), axis=0, return_index=True)
 _, idx_rx = np.unique(np.column_stack((xq_rx, yq_rx)), axis=0, return_index=True)
 points_tx = np.column_stack((xq_tx, yq_tx))[np.sort(idx)]
-points_rx = np.column_stack((xq_rx, yq_rx))[np.sort(idx)]
+points_rx = np.column_stack((xq_rx, yq_rx))[np.sort(idx_rx)]
 angles_tx = np.arctan2(points_tx[:,1] - cy, points_tx[:,0] - cx)
 angles_rx = np.arctan2(points_rx[:,1] - cy, points_rx[:,0] - cx)
 points_tx = np.round(points_tx[np.argsort(angles_tx)], 3)  

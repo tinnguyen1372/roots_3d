@@ -1,3 +1,4 @@
+from run_roots_cir import mpl_plot_Ascan
 from tools.outputfiles_merge import merge_files
 import h5py
 from tools.plot_Bscan import get_output_data, mpl_plot as mpl_plot_Bscan 
@@ -31,7 +32,16 @@ for output_file in output_files:
 # data1 = data1[2000:,:]
 # data = process_br(data)
 # data = np.subtract(data1,)
+
 plt = mpl_plot_Bscan("merged_output_data", data, dt,1,'Ey')
+# INSERT_YOUR_CODE
+plt.figure()
+plt.plot(data[:, 3])
+plt.title('First column of data')
+plt.xlabel('Index')
+plt.ylabel('Amplitude')
+plt.show()
+
 import matplotlib.pyplot as plt
 fig_width = 8
 fig_height = 8
