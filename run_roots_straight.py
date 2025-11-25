@@ -75,8 +75,8 @@ Configuration
 #pml_cells: {pml_cells} {pml_cells} {pml_cells} {pml_cells} {pml_cells} {pml_cells}
 
 Environment
-#soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
-#fractal_box: {pml:.3f} {pml:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.1:.3f} {domain_3d[2] - pml:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
+soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
+fractal_box: {pml:.3f} {pml:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.1:.3f} {domain_3d[2] - pml:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
 #material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
 #box: {pml:.3f} {1.1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.25:.3f} {domain_3d[2] - pml:.3f} confined_material
 
