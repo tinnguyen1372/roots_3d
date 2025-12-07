@@ -149,7 +149,7 @@ geometry_view: 0 0 0 {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f} {s
             f.write(config)
             f.close()
         api(self.input, 
-            n=1, 
+            n=self.num_scan, 
             # gpu=[0],
             geometry_only=False, geometry_fixed=False)
             # merge_files(self.input)
