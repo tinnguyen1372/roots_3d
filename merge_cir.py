@@ -30,16 +30,22 @@ for output_file in output_files:
         # data1 = np.subtract(data1, data[:,:20])
         data = np.concatenate((data, data1), axis=1)
 # data1 = data1[2000:,:]
-# data = process_br(data)
+data = process_br(data)
 # data = np.subtract(data1,)
 
 plt = mpl_plot_Bscan("merged_output_data", data, dt,1,'Ey')
-# INSERT_YOUR_CODE
-plt.figure()
-plt.plot(data[:, 3])
-plt.title('First column of data')
-plt.xlabel('Index')
-plt.ylabel('Amplitude')
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(nrows=4, ncols=4, figsize=(15, 10))
+axes = axes.flatten()
+
+for i in range(16):
+    axes[i].plot(data[:, i])
+    axes[i].set_title(f'Column {i} of data')
+    axes[i].set_xlabel('Index')
+    axes[i].set_ylabel('Amplitude')
+
+plt.tight_layout()
 plt.show()
 
 import matplotlib.pyplot as plt

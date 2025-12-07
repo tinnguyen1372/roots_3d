@@ -10,6 +10,12 @@ merge_files("./straightscannoroot/straight_scan_1", removefiles=False)
 merge_files("./straightscannoroot/straight_scan_2", removefiles=False)
 merge_files("./straightscannoroot/straight_scan_3", removefiles=False)
 merge_files("./straightscannoroot/straight_scan_4", removefiles=False)
+merge_files("./homo/straight_scan_1", removefiles=False)
+merge_files("./homo/straight_scan_2", removefiles=False)
+merge_files("./homo/straight_scan_3", removefiles=False)
+merge_files("./homo/straight_scan_4", removefiles=False)
+
+homo_output_files = ["./homo/straight_scan_1_merged.out", "./homo/straight_scan_2_merged.out", "./homo/straight_scan_3_merged.out", "./homo/straight_scan_4_merged.out"]
 noroot_output_files = ["./straightscannoroot/straight_scan_1_merged.out", "./straightscannoroot/straight_scan_2_merged.out", "./straightscannoroot/straight_scan_3_merged.out", "./straightscannoroot/straight_scan_4_merged.out"]
 output_files = ["./straight_scans/straight_scan_1_merged.out", "./straight_scans/straight_scan_2_merged.out", "./straight_scans/straight_scan_3_merged.out", "./straight_scans/straight_scan_4_merged.out"]
 # merge_files("./Root3D/Base/Base", removefiles=False)
@@ -19,7 +25,7 @@ def process_br(raw_ra):
     return raw_br
 
 
-data = None  # Initialize as None so we can handle the first file easily
+hete_data = None  # Initialize as None so we can handle the first file easily
 
 for output_file in output_files:
     
@@ -28,11 +34,11 @@ for output_file in output_files:
         print(data1.shape)
         dt = f1.attrs['dt']
     # data1 = process_br(data1)
-    if data is None:
-        data = data1
+    if hete_data is None:
+        hete_data = data1
     else:
         # data1 = np.subtract(data1, data[:,:20])
-        data = np.concatenate((data, data1), axis=1)
+        hete_data = np.concatenate((hete_data, data1), axis=1)
 
 noroot_data = None
 for noroot_output_file in noroot_output_files:
@@ -45,10 +51,22 @@ for noroot_output_file in noroot_output_files:
         noroot_data = data1
     else:
         noroot_data = np.concatenate((noroot_data, data1), axis=1)
+
+homo_data = None
+for homo_output_file in homo_output_files:
+    with h5py.File(homo_output_file, 'r') as f1:
+        data1 = f1['rxs']['rx1']['Ey'][()]
+        print(data1.shape)
+        dt = f1.attrs['dt']
+    if homo_data is None:
+        homo_data = data1
+    else:
+        homo_data = np.concatenate((homo_data, data1), axis=1)
 # data = data[:,:]
 # data = process_br(data)
-data = np.subtract(data, noroot_data)
-
+# data = np.subtract(homo_data, noroot_data)
+data = process_br(homo_data)
+# data = process_br(hete_data)
 # data = np.subtract(data1,)
 # plt = mpl_plot_Bscan("merged_output_data", noroot_data, dt,1,'Ey')
 # plt.show()

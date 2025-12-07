@@ -34,7 +34,7 @@ class Roots_Func():
         self.confined_permittivity = getattr(args, 'confined_permittivity', 5.24)
         self.confined_conductivity = getattr(args, 'confined_conductivity', 0.001)
         
-        self.roots_permittivity = getattr(args, 'roots_permittivity', [24, 24])
+        self.roots_permittivity = getattr(args, 'roots_permittivity', [12, 12])
         self.roots_conductivity = getattr(args, 'roots_conductivity', [0.0002, 0.0002])
 
         self.src_to_gnd = 0.1 
@@ -82,39 +82,63 @@ Environment
 #python:
 from gprMax.input_cmd_funcs import *
 import numpy as np
-r_tx = 1         # radius
-r_rx = 1.10
-delta = 0.005   # grid resolution
-theta = np.linspace(0, 2*np.pi, number_model_runs+1)
 
-# continuous circle
-cx = 3.200 / 2
-cy = 3.200 / 2
+r_tx = 1.0
+r_rx = 1.10
+delta = 0.005
+
+# domain dimensions passed from gprMax context
+cx = domain_x / 2
+cz = domain_z / 2
+
+theta = np.linspace(0, 2*np.pi, number_model_runs + 1)
+
+# compute coordinates in x–z plane
 x_tx = cx + r_tx * np.cos(theta)
-y_tx = cy + r_tx * np.sin(theta)
+z_tx = cz + r_tx * np.sin(theta)
 
 x_rx = cx + r_rx * np.cos(theta)
-y_rx = cy + r_rx * np.sin(theta)
-# quantized coordinates
-xq_tx = np.round(x_tx / delta) * delta
-yq_tx = np.round(y_tx / delta) * delta
-xq_rx = np.round(x_rx / delta) * delta
-yq_rx = np.round(y_rx / delta) * delta
+z_rx = cz + r_rx * np.sin(theta)
 
-_, idx = np.unique(np.column_stack((xq_tx, yq_tx)), axis=0, return_index=True)
-_, idx_rx = np.unique(np.column_stack((xq_rx, yq_rx)), axis=0, return_index=True)
-points_tx = np.column_stack((xq_tx, yq_tx))[np.sort(idx)]
-points_rx = np.column_stack((xq_rx, yq_rx))[np.sort(idx_rx)]
-angles_tx = np.arctan2(points_tx[:,1] - cy, points_tx[:,0] - cx)
-angles_rx = np.arctan2(points_rx[:,1] - cy, points_rx[:,0] - cx)
-points_tx = np.round(points_tx[np.argsort(angles_tx)], 3)  
-points_rx = np.round(points_rx[np.argsort(angles_rx)], 3)  
+# quantize to grid
+xq_tx = np.round(x_tx / delta) * delta
+zq_tx = np.round(z_tx / delta) * delta
+
+xq_rx = np.round(x_rx / delta) * delta
+zq_rx = np.round(z_rx / delta) * delta
+
+# remove duplicates
+_, idx1 = np.unique(np.column_stack((xq_tx, zq_tx)), axis=0, return_index=True)
+_, idx2 = np.unique(np.column_stack((xq_rx, zq_rx)), axis=0, return_index=True)
+
+points_tx = np.column_stack((xq_tx, zq_tx))[np.sort(idx1)]
+points_rx = np.column_stack((xq_rx, zq_rx))[np.sort(idx2)]
+
+# sort by angle around circle
+angles_tx = np.arctan2(points_tx[:,1] - cz, points_tx[:,0] - cx)
+angles_rx = np.arctan2(points_rx[:,1] - cz, points_rx[:,0] - cx)
+
+points_tx = points_tx[np.argsort(angles_tx)]
+points_rx = points_rx[np.argsort(angles_rx)]
+
+points_tx = np.round(points_tx, 3)
+points_rx = np.round(points_rx, 3)
+
+antenna_height = 1.25
 
 waveform('gaussian', 1, 5e8, 'my_gaussian')
-hertzian_dipole('y', points_tx[current_model_run-1][0], 1.25, points_tx[current_model_run-1][1], 'my_gaussian') 
+
+hertzian_dipole(
+    'y',
+    points_tx[current_model_run-1][0],
+    antenna_height,
+    points_tx[current_model_run-1][1],
+    'my_gaussian'
+) 
+
 rx(
     points_rx[current_model_run-1][0],
-    1.25,
+    antenna_height,
     points_rx[current_model_run-1][1]
 )
 #end_python:
@@ -125,8 +149,8 @@ geometry_view: 0 0 0 {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f} {s
             f.write(config)
             f.close()
         api(self.input, 
-            n=int(self.num_scan), 
-            gpu=[0],
+            n=1, 
+            # gpu=[0],
             geometry_only=False, geometry_fixed=False)
             # merge_files(self.input)
             # data_quarter = get_output_data(self.input)
