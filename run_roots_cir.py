@@ -88,8 +88,8 @@ r_rx = 1.10
 delta = 0.005
 
 # domain dimensions passed from gprMax context
-cx = domain_x / 2
-cz = domain_z / 2
+cx = {domain_3d[0]} / 2
+cz = {domain_3d[2]} / 2
 
 theta = np.linspace(0, 2*np.pi, number_model_runs + 1)
 
