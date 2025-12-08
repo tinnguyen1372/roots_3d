@@ -23,7 +23,7 @@ for output_file in output_files:
         data1 = f1['rxs']['rx1']['Ey'][()]
         print(data1.shape)
         dt = f1.attrs['dt']
-    data1 = process_br(data1)
+    # data1 = process_br(data1)
     if data is None:
         data = data1
     else:
@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 fig, axes = plt.subplots(nrows=4, ncols=4, figsize=(15, 10))
 axes = axes.flatten()
 
-for i in range(16):
+for i in range(4):
     axes[i].plot(data[:, i])
     axes[i].set_title(f'Column {i} of data')
     axes[i].set_xlabel('Index')

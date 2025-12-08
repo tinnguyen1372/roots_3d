@@ -27,7 +27,7 @@ class Roots_Func():
         self.time_window = getattr(args, 'time_window', 30e-9)
 
         # Geometry parameters
-        self.h5_file = getattr(args, 'h5file', 'test.h5')
+        self.h5_file = getattr(args, 'h5file', 'test_voxel.h5')
         self.x , self.y , self.z = 2 , 1 , 2
         # self.pix = int(max(self.x, self.y, self.z)/self.resol)
 
