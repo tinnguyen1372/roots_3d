@@ -24,7 +24,7 @@ class Roots_Func():
 
         self.num_scan = getattr(args, 'num_scan', 72)
         self.resol = getattr(args, 'resol', 0.005)
-        self.time_window = getattr(args, 'time_window', 60e-9)
+        self.time_window = getattr(args, 'time_window', 40e-9)
 
         # Geometry parameters
         self.h5_file = getattr(args, 'h5file', 'test.h5')
@@ -74,8 +74,8 @@ Configuration
 #pml_cells: {pml_cells} {pml_cells} {pml_cells} {pml_cells} {pml_cells} {pml_cells}
 
 Environment
-#soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
-#fractal_box: {pml:.3f} {pml:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.1:.3f} {domain_3d[2] - pml:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
+soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
+fractal_box: {pml:.3f} {pml:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.1:.3f} {domain_3d[2] - pml:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
 #material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
 #box: {pml:.3f} {1.1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.2:.3f} {domain_3d[2] - pml:.3f} confined_material
 
@@ -83,8 +83,8 @@ Environment
 from gprMax.input_cmd_funcs import *
 import numpy as np
 
-r_tx = 1.0
-r_rx = 1.10
+r_tx = 1.1
+r_rx = 1.15
 delta = 0.005
 
 # domain dimensions passed from gprMax context

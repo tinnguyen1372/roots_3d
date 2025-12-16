@@ -2,10 +2,10 @@ from tools.outputfiles_merge import merge_files
 import h5py
 from tools.plot_Bscan import get_output_data, mpl_plot as mpl_plot_Bscan 
 import numpy as np
-merge_files("./straight_scans/straight_scan_1", removefiles=False)
-merge_files("./straight_scans/straight_scan_2", removefiles=False)
-merge_files("./straight_scans/straight_scan_3", removefiles=False)
-merge_files("./straight_scans/straight_scan_4", removefiles=False)
+merge_files("./voxel/straight_scan_1", removefiles=False)
+merge_files("./voxel/straight_scan_2", removefiles=False)
+merge_files("./voxel/straight_scan_3", removefiles=False)
+merge_files("./voxel/straight_scan_4", removefiles=False)
 merge_files("./straightscannoroot/straight_scan_1", removefiles=False)
 merge_files("./straightscannoroot/straight_scan_2", removefiles=False)
 merge_files("./straightscannoroot/straight_scan_3", removefiles=False)
@@ -17,7 +17,7 @@ merge_files("./homo/straight_scan_4", removefiles=False)
 
 homo_output_files = ["./homo/straight_scan_1_merged.out", "./homo/straight_scan_2_merged.out", "./homo/straight_scan_3_merged.out", "./homo/straight_scan_4_merged.out"]
 noroot_output_files = ["./straightscannoroot/straight_scan_1_merged.out", "./straightscannoroot/straight_scan_2_merged.out", "./straightscannoroot/straight_scan_3_merged.out", "./straightscannoroot/straight_scan_4_merged.out"]
-output_files = ["./straight_scans/straight_scan_1_merged.out", "./straight_scans/straight_scan_2_merged.out", "./straight_scans/straight_scan_3_merged.out", "./straight_scans/straight_scan_4_merged.out"]
+output_files = ["./voxel/straight_scan_1_merged.out", "./voxel/straight_scan_2_merged.out", "./voxel/straight_scan_3_merged.out", "./voxel/straight_scan_4_merged.out"]
 # merge_files("./Root3D/Base/Base", removefiles=False)
 # base_output_file = "./Root3D/Base/Base_merged.out"
 def process_br(raw_ra):
@@ -65,7 +65,7 @@ for homo_output_file in homo_output_files:
 # data = data[:,:]
 # data = process_br(data)
 # data = np.subtract(homo_data, noroot_data)
-data = process_br(homo_data)
+data = process_br(hete_data)
 # data = process_br(hete_data)
 # data = np.subtract(data1,)
 # plt = mpl_plot_Bscan("merged_output_data", noroot_data, dt,1,'Ey')
