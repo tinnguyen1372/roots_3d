@@ -20,160 +20,98 @@ from PIL import Image
 
 class Roots_Func():
     def __init__(self, args) -> None:
-        self.gpu = getattr(args, 'gpu', 0)
-
+        self.gpu = getattr(args, 'gpu', [0])
         self.num_scan = getattr(args, 'num_scan', 72)
         self.resol = getattr(args, 'resol', 0.005)
         self.time_window = getattr(args, 'time_window', 40e-9)
-
-        # Geometry parameters
-        self.h5_file = getattr(args, 'h5file', 'test.h5')
-        self.x , self.y , self.z = 2 , 1 , 2
-        # self.pix = int(max(self.x, self.y, self.z)/self.resol)
-
+        self.h5_file = getattr(args, 'h5file', 'test_1.h5')
+        
+        # Dimensions for the object to be read from H5
+        self.x, self.y, self.z = 2, 1, 2
         self.confined_permittivity = getattr(args, 'confined_permittivity', 5.24)
         self.confined_conductivity = getattr(args, 'confined_conductivity', 0.001)
         
         self.roots_permittivity = getattr(args, 'roots_permittivity', [12, 12])
         self.roots_conductivity = getattr(args, 'roots_conductivity', [0.0002, 0.0002])
-
-        self.src_to_gnd = 0.1 
-        self.src_to_rx = 0.1 
-        self.confined_size = 20 * self.resol
-
-        self.fractal_box_seed = getattr(args, 'fractal_box_seed', 42) # random_randint(0,100)
+        self.fractal_box_seed = getattr(args, 'fractal_box_seed', 42)
 
     def run_circular_scan(self):
         self.input = 'circular_scan.in'
         pml_cells = 20
-        pml = self.resol * pml_cells
-        src_to_pml = 0.05
+        pml_val = self.resol * pml_cells
 
-        sharp_domain = 3 , 1.5, 3
+        # Define the simulation domain
+        sharp_domain = [3.0, 1.5, 3.0]
         domain_3d = [
-            float(sharp_domain[0] + 2 * pml), 
-            float(sharp_domain[1] + 2 * pml), 
-            float(sharp_domain[2] + 2 * pml)
+            float(sharp_domain[0] + 2 * pml_val), 
+            float(sharp_domain[1] + 2 * pml_val), 
+            float(sharp_domain[2] + 2 * pml_val)
         ]
+
+        # Generate material file for H5 objects
         self_mat_file = 'Object_materials.txt'
         with open(self_mat_file, 'w') as f:
             for i in range(len(self.roots_permittivity)):
-                f.write('#material: {} {} 1 0 Object{}\n'.format(self.roots_permittivity[i], self.roots_conductivity[i], i))
-            f.close()
+                f.write(f'#material: {self.roots_permittivity[i]} {self.roots_conductivity[i]} 1 0 Object{i}\n')
 
-        data = []
-        self.input = f'circular_scan.in'
-        config = f'''
-#title: Roots under Hete Soil Imaging
-
-Configuration
+        # The Python block inside the .in file handles the rotation logic
+        config = f'''#title: Circular Root Scan
 #domain: {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f}
 #dx_dy_dz: {self.resol} {self.resol} {self.resol}
 #time_window: {self.time_window}
+#pml_cells: {pml_cells}
 
-#pml_cells: {pml_cells} {pml_cells} {pml_cells} {pml_cells} {pml_cells} {pml_cells}
-
-Environment
+#material: 5.24 0.001 1 0 hete_soil
 soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
-fractal_box: {pml:.3f} {pml:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.1:.3f} {domain_3d[2] - pml:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
-#material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
-#box: {pml:.3f} {1.1:.3f} {pml:.3f} {domain_3d[0] - pml:.3f} {1.2:.3f} {domain_3d[2] - pml:.3f} confined_material
-
+fractal_box: {pml_val:.3f} {pml_val:.3f} {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.1 {domain_3d[2] - pml_val:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
 #python:
 from gprMax.input_cmd_funcs import *
 import numpy as np
 
-r_tx = 1.1
+# Radii for Tx and Rx
+r_tx = 1.10
 r_rx = 1.15
-delta = 0.005
+delta = {self.resol}
 
-# domain dimensions passed from gprMax context
+# Center of the domain in X-Z plane
 cx = {domain_3d[0]} / 2
 cz = {domain_3d[2]} / 2
 
-theta = np.linspace(0, 2*np.pi, number_model_runs + 1)
+# Calculate angle
+total_runs = {self.num_scan}
+angle = (2 * np.pi * (current_model_run - 1)) / total_runs
 
-# compute coordinates in x–z plane
-x_tx = cx + r_tx * np.cos(theta)
-z_tx = cz + r_tx * np.sin(theta)
+# Calculate positions
+tx_x, tx_z = cx + r_tx * np.cos(angle), cz + r_tx * np.sin(angle)
+rx_x, rx_z = cx + r_rx * np.cos(angle), cz + r_rx * np.sin(angle)
 
-x_rx = cx + r_rx * np.cos(theta)
-z_rx = cz + r_rx * np.sin(theta)
-
-# quantize to grid
-xq_tx = np.round(x_tx / delta) * delta
-zq_tx = np.round(z_tx / delta) * delta
-
-xq_rx = np.round(x_rx / delta) * delta
-zq_rx = np.round(z_rx / delta) * delta
-
-# remove duplicates
-_, idx1 = np.unique(np.column_stack((xq_tx, zq_tx)), axis=0, return_index=True)
-_, idx2 = np.unique(np.column_stack((xq_rx, zq_rx)), axis=0, return_index=True)
-
-points_tx = np.column_stack((xq_tx, zq_tx))[np.sort(idx1)]
-points_rx = np.column_stack((xq_rx, zq_rx))[np.sort(idx2)]
-
-# sort by angle around circle
-angles_tx = np.arctan2(points_tx[:,1] - cz, points_tx[:,0] - cx)
-angles_rx = np.arctan2(points_rx[:,1] - cz, points_rx[:,0] - cx)
-
-points_tx = points_tx[np.argsort(angles_tx)]
-points_rx = points_rx[np.argsort(angles_rx)]
-
-points_tx = np.round(points_tx, 3)
-points_rx = np.round(points_rx, 3)
-
-antenna_height = 1.25
+# UPDATED: Antenna height matches top of the confined box (1.20m)
+# This removes the 5cm air gap
+antenna_y = 1.20 
 
 waveform('gaussian', 1, 5e8, 'my_gaussian')
-
-hertzian_dipole(
-    'y',
-    points_tx[current_model_run-1][0],
-    antenna_height,
-    points_tx[current_model_run-1][1],
-    'my_gaussian'
-) 
-
-rx(
-    points_rx[current_model_run-1][0],
-    antenna_height,
-    points_rx[current_model_run-1][1]
-)
+hertzian_dipole('y', tx_x, antenna_y, tx_z, 'my_gaussian')
+rx(rx_x, antenna_y, rx_z)
 #end_python:
-#geometry_objects_read: {(domain_3d[0]/2 - self.x/2) :.3f} {domain_3d[1]/2 - self.y/2 - 0.25:.3f} {(domain_3d[2]/2 - self.z/2):.3f} {self.h5_file} Object_materials.txt
+#material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
+#box: {pml_val:.3f} 1.100 {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.200 {domain_3d[2] - pml_val:.3f} confined_material
+#geometry_objects_read: {(domain_3d[0]/2 - self.x/2):.3f} {domain_3d[1]/2 - self.y/2 - 0.25:.3f} {(domain_3d[2]/2 - self.z/2):.3f} {self.h5_file} {self_mat_file}
 geometry_view: 0 0 0 {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f} {self.resol} {self.resol} {self.resol} CircularScan n
-    '''     
+''' 
         with open(self.input, 'w') as f:
             f.write(config)
-            f.close()
+
+        # Run the simulation
         api(self.input, 
-            n=self.num_scan, 
-            gpu=[0],
-            geometry_only=False, geometry_fixed=False)
-            # merge_files(self.input)
-            # data_quarter = get_output_data(self.input)
-            # bscan = mpl_plot_Bscan(data, self.resol)
-            # ascan = mpl_plot_Ascan(dat
-            # a, self.resol)
-            # return bscan, ascan
-            # data.append(data_quarter)
-        # INSERT_YOUR_CODE
-        # Merge the 4 data_quarter (assumed to be numpy arrays or similar)
-        # import numpy as np
-        # merged_data = np.concatenate(data, axis=0)
-
-        # plt.imshow(merged_data, cmap='gray', aspect='auto')
-        # plt.savefig('merged_data.png')
-        # plt.close()
-
+            n=int(self.num_scan), 
+            # gpu=[0],
+            geometry_only=True, 
+            geometry_fixed=False)
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Roots Scanning for Through Imaging")      
-    parser.add_argument('--start', type=int, default=0, help='Start of the generated geometry')
-    parser.add_argument('--end', type=int, default=1, help='End of the generated geometry')
-    parser.add_argument('--num_scan', type=int, default=5, help='Number of A-Scans')
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--num_scan', type=int, default=72) # 5 degrees per step
+    parser.add_argument('--h5file', type=str, default='test_1.h5')
     args = parser.parse_args()
+    
     rootimg = Roots_Func(args=args)
     rootimg.run_circular_scan()
