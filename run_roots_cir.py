@@ -73,7 +73,7 @@ r_tx = 1.10
 r_rx = 1.15
 delta = {self.resol}
 
-# Center of the domain in X-Z plane
+# Center of the domain
 cx = {domain_3d[0]} / 2
 cz = {domain_3d[2]} / 2
 
@@ -85,12 +85,13 @@ angle = (2 * np.pi * (current_model_run - 1)) / total_runs
 tx_x, tx_z = cx + r_tx * np.cos(angle), cz + r_tx * np.sin(angle)
 rx_x, rx_z = cx + r_rx * np.cos(angle), cz + r_rx * np.sin(angle)
 
-# UPDATED: Antenna height matches top of the confined box (1.20m)
-# This removes the 5cm air gap
-antenna_y = 1.20 
+# FIX 1: Move antenna 2 cells ABOVE the box interface to avoid instability
+antenna_y = 1.20 + (2 * delta) 
 
+# FIX 2: Change dipole orientation to 'z' or 'x' 
+# A 'y' dipole (vertical) often has poor coupling for horizontal circular scans.
 waveform('gaussian', 1, 5e8, 'my_gaussian')
-hertzian_dipole('y', tx_x, antenna_y, tx_z, 'my_gaussian')
+hertzian_dipole('z', tx_x, antenna_y, tx_z, 'my_gaussian')
 rx(rx_x, antenna_y, rx_z)
 #end_python:
 #material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
