@@ -104,8 +104,8 @@ geometry_view: 0 0 0 {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f} {s
         # Run the simulation
         api(self.input, 
             n=int(self.num_scan), 
-            # gpu=[0],
-            geometry_only=True, 
+            gpu=[0],
+            # geometry_only=True, 
             geometry_fixed=False)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
