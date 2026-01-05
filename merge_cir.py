@@ -20,7 +20,7 @@ data = None  # Initialize as None so we can handle the first file easily
 for output_file in output_files:
     
     with h5py.File(output_file, 'r') as f1:
-        data1 = f1['rxs']['rx1']['Ez'][()]
+        data1 = f1['rxs']['rx1']['Ex'][()]
         print(data1.shape)
         dt = f1.attrs['dt']
     # data1 = process_br(data1)
@@ -33,7 +33,7 @@ for output_file in output_files:
 data = process_br(data)
 # data = np.subtract(data1,)
 
-plt = mpl_plot_Bscan("merged_output_data", data, dt,1,'Ez')
+plt = mpl_plot_Bscan("merged_output_data", data, dt,1,'Ey')
 import matplotlib.pyplot as plt
 
 fig, axes = plt.subplots(nrows=4, ncols=4, figsize=(15, 10))
