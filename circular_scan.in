@@ -11,32 +11,25 @@ fractal_box: 0.100 0.100 0.100 3.100 1.1 3.100 1.5 1 1 1 20 hete_soil my_fractal
 from gprMax.input_cmd_funcs import *
 import numpy as np
 
-# Radii for Tx and Rx
-r_tx = 1.10
-r_rx = 1.15
-delta = 0.005
+r_ant = 1.10
+cx, cz = 3.2/2, 3.2/2
+total_runs = 1
 
-# Center of the domain in X-Z plane
-cx = 3.2 / 2
-cz = 3.2 / 2
+# Angle for this specific step
+angle_tx = (2 * np.pi * (current_model_run - 1)) / total_runs
+# Offset Rx by about 10cm along the arc to avoid overlap
+angle_rx = angle_tx + (0.10 / r_ant) 
 
-# Calculate angle
-total_runs = 72
-angle = (2 * np.pi * (current_model_run - 1)) / total_runs
-
-# Calculate positions
-tx_x, tx_z = cx + r_tx * np.cos(angle), cz + r_tx * np.sin(angle)
-rx_x, rx_z = cx + r_rx * np.cos(angle), cz + r_rx * np.sin(angle)
-
-# UPDATED: Antenna height matches top of the confined box (1.20m)
-# This removes the 5cm air gap
-antenna_y = 1.20 
+tx_x, tx_z = cx + r_ant * np.cos(angle_tx), cz + r_ant * np.sin(angle_tx)
+rx_x, rx_z = cx + r_ant * np.cos(angle_rx), cz + r_ant * np.sin(angle_rx)
+antenna_y = 1.20 + (2 * 0.005)
 
 waveform('gaussian', 1, 5e8, 'my_gaussian')
-hertzian_dipole('y', tx_x, antenna_y, tx_z, 'my_gaussian')
+# Use 'z' as it is the best supported horizontal polarization
+hertzian_dipole('z', tx_x, antenna_y, tx_z, 'my_gaussian')
 rx(rx_x, antenna_y, rx_z)
 #end_python:
 #material: 5.24 0.001 1 0 confined_material
 #box: 0.100 1.100 0.100 3.100 1.200 3.100 confined_material
 #geometry_objects_read: 0.600 0.100 0.600 test_1.h5 Object_materials.txt
-#geometry_view: 0 0 0 3.200 1.700 3.200 0.005 0.005 0.005 CircularScan n
+geometry_view: 0 0 0 3.200 1.700 3.200 0.005 0.005 0.005 CircularScan n

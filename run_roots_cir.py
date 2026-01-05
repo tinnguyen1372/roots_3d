@@ -68,29 +68,21 @@ fractal_box: {pml_val:.3f} {pml_val:.3f} {pml_val:.3f} {domain_3d[0] - pml_val:.
 from gprMax.input_cmd_funcs import *
 import numpy as np
 
-# Radii for Tx and Rx
-r_tx = 1.10
-r_rx = 1.15
-delta = {self.resol}
-
-# Center of the domain
-cx = {domain_3d[0]} / 2
-cz = {domain_3d[2]} / 2
-
-# Calculate angle
+r_ant = 1.10
+cx, cz = {domain_3d[0]}/2, {domain_3d[2]}/2
 total_runs = {self.num_scan}
-angle = (2 * np.pi * (current_model_run - 1)) / total_runs
 
-# Calculate positions
-tx_x, tx_z = cx + r_tx * np.cos(angle), cz + r_tx * np.sin(angle)
-rx_x, rx_z = cx + r_rx * np.cos(angle), cz + r_rx * np.sin(angle)
+# Angle for this specific step
+angle_tx = (2 * np.pi * (current_model_run - 1)) / total_runs
+# Offset Rx by about 10cm along the arc to avoid overlap
+angle_rx = angle_tx + (0.10 / r_ant) 
 
-# FIX 1: Move antenna 2 cells ABOVE the box interface to avoid instability
-antenna_y = 1.20 + (2 * delta) 
+tx_x, tx_z = cx + r_ant * np.cos(angle_tx), cz + r_ant * np.sin(angle_tx)
+rx_x, rx_z = cx + r_ant * np.cos(angle_rx), cz + r_ant * np.sin(angle_rx)
+antenna_y = 1.20 + (2 * {self.resol})
 
-# FIX 2: Change dipole orientation to 'z' or 'x' 
-# A 'y' dipole (vertical) often has poor coupling for horizontal circular scans.
 waveform('gaussian', 1, 5e8, 'my_gaussian')
+# Use 'z' as it is the best supported horizontal polarization
 hertzian_dipole('z', tx_x, antenna_y, tx_z, 'my_gaussian')
 rx(rx_x, antenna_y, rx_z)
 #end_python:
@@ -110,7 +102,7 @@ geometry_view: 0 0 0 {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f} {s
             geometry_fixed=False)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num_scan', type=int, default=72) # 5 degrees per step
+    parser.add_argument('--num_scan', type=int, default=36) # 5 degrees per step
     parser.add_argument('--h5file', type=str, default='test_1.h5')
     args = parser.parse_args()
     
