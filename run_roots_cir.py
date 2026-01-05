@@ -83,7 +83,7 @@ antenna_y = 1.20 + (2 * {self.resol})
 
 waveform('gaussian', 1, 5e8, 'my_gaussian')
 # Use 'z' as it is the best supported horizontal polarization
-hertzian_dipole('z', tx_x, antenna_y, tx_z, 'my_gaussian')
+hertzian_dipole('y', tx_x, antenna_y, tx_z, 'my_gaussian')
 rx(rx_x, antenna_y, rx_z)
 #end_python:
 #material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
