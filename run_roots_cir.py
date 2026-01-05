@@ -64,16 +64,16 @@ class Roots_Func():
 #fractal_box: {pml_val:.3f} {pml_val:.3f} {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.1 {domain_3d[2] - pml_val:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
 
 #python:
-from gprMax.input_cmd_funcs import *
 import numpy as np
+from gprMax.input_cmd_funcs import rx, waveform
 
-# 1. Configuration: 5cm radial distance between circles
-r_tx = 1.10         # Inner circle radius
-r_rx = 1.15         # Outer circle radius (5cm distance)
+# 1. Configuration: 5cm radial distance between Tx and Rx
+r_tx = 1.10         
+r_rx = 1.15         
 cx = {domain_3d[0]} / 2
 cz = {domain_3d[2]} / 2
 
-# 2. Position Calculation
+# 2. Position Calculation (Simulation Time)
 total_runs = {self.num_scan}
 angle_rad = (2 * np.pi * (current_model_run - 1)) / total_runs
 
@@ -81,19 +81,23 @@ tx_x, tx_z = cx + r_tx * np.cos(angle_rad), cz + r_tx * np.sin(angle_rad)
 rx_x, rx_z = cx + r_rx * np.cos(angle_rad), cz + r_rx * np.sin(angle_rad)
 antenna_y = 1.20 + (2 * {self.resol})
 
-# 3. ROTATING (TANGENTIAL) POLARIZATION
-# Calculate tangential unit vector: (-sin(theta), cos(theta))
+# 3. Tangential Vector Components for "Turning"
+# This determines the amplitude for each fixed polarization axis
 vx = -np.sin(angle_rad)
 vz = np.cos(angle_rad)
 
-# Define antenna length (e.g., 0.01m) to create the vector
-dl = 0.01 
+# 4. Define two waveforms with adjusted amplitudes to simulate rotation
+# We create one waveform for X and one for Z, scaled by the vector components
+waveform('gaussian', vx, 5e8, 'wave_x')
+waveform('gaussian', vz, 5e8, 'wave_z')
 
-waveform('gaussian', 1, 5e8, 'my_gaussian')
+# 5. Inject the two dipoles at the same location to create the turned field
+# Syntax: #hertzian_dipole: polarisation x y z waveform
+if abs(vx) > 1e-4:
+    print(f'#hertzian_dipole: x {{tx_x:.4f}} {{antenna_y:.4f}} {{tx_z:.4f}} wave_x')
+if abs(vz) > 1e-4:
+    print(f'#hertzian_dipole: z {{tx_x:.4f}} {{antenna_y:.4f}} {{tx_z:.4f}} wave_z')
 
-# Using 'dipole' to allow non-axial (rotated) orientation
-# Syntax: dipole(direction, x1, y1, z1, x2, y2, z2, waveform)
-dipole('z', tx_x, antenna_y, tx_z, tx_x + (vx * dl), antenna_y, tx_z + (vz * dl), 'my_gaussian')
 rx(rx_x, antenna_y, rx_z)
 #end_python:
 
@@ -101,7 +105,7 @@ rx(rx_x, antenna_y, rx_z)
 #box: {pml_val:.3f} 1.100 {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.200 {domain_3d[2] - pml_val:.3f} confined_material
 #geometry_objects_read: {(domain_3d[0]/2 - self.x/2):.3f} {domain_3d[1]/2 - self.y/2 - 0.25:.3f} {(domain_3d[2]/2 - self.z/2):.3f} {self.h5_file} {self_mat_file}
 geometry_view: 0 0 0 {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f} {self.resol} {self.resol} {self.resol} CircularScan n
-''' 
+'''
         with open(self.input, 'w') as f:
             f.write(config)
 

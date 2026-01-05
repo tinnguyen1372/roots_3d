@@ -5,31 +5,48 @@
 #pml_cells: 20
 
 #material: 5.24 0.001 1 0 hete_soil
-soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
-fractal_box: 0.100 0.100 0.100 3.100 1.1 3.100 1.5 1 1 1 20 hete_soil my_fractal_box 42
+#soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
+#fractal_box: 0.100 0.100 0.100 3.100 1.1 3.100 1.5 1 1 1 20 hete_soil my_fractal_box 42
+
 #python:
-from gprMax.input_cmd_funcs import *
 import numpy as np
+from gprMax.input_cmd_funcs import rx, waveform
 
-r_ant = 1.10
-cx, cz = 3.2/2, 3.2/2
+# 1. Configuration: 5cm radial distance between Tx and Rx
+r_tx = 1.10         
+r_rx = 1.15         
+cx = 3.2 / 2
+cz = 3.2 / 2
+
+# 2. Position Calculation (Simulation Time)
 total_runs = 1
+angle_rad = (2 * np.pi * (current_model_run - 1)) / total_runs
 
-# Angle for this specific step
-angle_tx = (2 * np.pi * (current_model_run - 1)) / total_runs
-# Offset Rx by about 10cm along the arc to avoid overlap
-angle_rx = angle_tx + (0.10 / r_ant) 
-
-tx_x, tx_z = cx + r_ant * np.cos(angle_tx), cz + r_ant * np.sin(angle_tx)
-rx_x, rx_z = cx + r_ant * np.cos(angle_rx), cz + r_ant * np.sin(angle_rx)
+tx_x, tx_z = cx + r_tx * np.cos(angle_rad), cz + r_tx * np.sin(angle_rad)
+rx_x, rx_z = cx + r_rx * np.cos(angle_rad), cz + r_rx * np.sin(angle_rad)
 antenna_y = 1.20 + (2 * 0.005)
 
-waveform('gaussian', 1, 5e8, 'my_gaussian')
-# Use 'z' as it is the best supported horizontal polarization
-hertzian_dipole('y', tx_x, antenna_y, tx_z, 'my_gaussian')
+# 3. Tangential Vector Components for "Turning"
+# This determines the amplitude for each fixed polarization axis
+vx = -np.sin(angle_rad)
+vz = np.cos(angle_rad)
+
+# 4. Define two waveforms with adjusted amplitudes to simulate rotation
+# We create one waveform for X and one for Z, scaled by the vector components
+waveform('gaussian', vx, 5e8, 'wave_x')
+waveform('gaussian', vz, 5e8, 'wave_z')
+
+# 5. Inject the two dipoles at the same location to create the turned field
+# Syntax: #hertzian_dipole: polarisation x y z waveform
+if abs(vx) > 1e-4:
+    print(f'#hertzian_dipole: x {tx_x:.4f} {antenna_y:.4f} {tx_z:.4f} wave_x')
+if abs(vz) > 1e-4:
+    print(f'#hertzian_dipole: z {tx_x:.4f} {antenna_y:.4f} {tx_z:.4f} wave_z')
+
 rx(rx_x, antenna_y, rx_z)
 #end_python:
+
 #material: 5.24 0.001 1 0 confined_material
 #box: 0.100 1.100 0.100 3.100 1.200 3.100 confined_material
 #geometry_objects_read: 0.600 0.100 0.600 test_1.h5 Object_materials.txt
-#geometry_view: 0 0 0 3.200 1.700 3.200 0.005 0.005 0.005 CircularScan n
+geometry_view: 0 0 0 3.200 1.700 3.200 0.005 0.005 0.005 CircularScan n
