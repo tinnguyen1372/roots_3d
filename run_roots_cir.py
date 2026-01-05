@@ -34,7 +34,6 @@ class Roots_Func():
         self.roots_permittivity = getattr(args, 'roots_permittivity', [12, 12])
         self.roots_conductivity = getattr(args, 'roots_conductivity', [0.0002, 0.0002])
         self.fractal_box_seed = getattr(args, 'fractal_box_seed', 42)
-
     def run_circular_scan(self):
         self.input = 'circular_scan.in'
         pml_cells = 20
@@ -48,54 +47,56 @@ class Roots_Func():
             float(sharp_domain[2] + 2 * pml_val)
         ]
 
-        # Generate material file for H5 objects
+        # Generate material file
         self_mat_file = 'Object_materials.txt'
         with open(self_mat_file, 'w') as f:
             for i in range(len(self.roots_permittivity)):
                 f.write(f'#material: {self.roots_permittivity[i]} {self.roots_conductivity[i]} 1 0 Object{i}\n')
 
-        # The Python block inside the .in file handles the rotation logic
         config = f'''#title: Circular Root Scan
 #domain: {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f}
 #dx_dy_dz: {self.resol} {self.resol} {self.resol}
 #time_window: {self.time_window}
 #pml_cells: {pml_cells}
 
-material: 5.24 0.001 1 0 hete_soil
-soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
-fractal_box: {pml_val:.3f} {pml_val:.3f} {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.1 {domain_3d[2] - pml_val:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
+#material: 5.24 0.001 1 0 hete_soil
+#soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
+#fractal_box: {pml_val:.3f} {pml_val:.3f} {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.1 {domain_3d[2] - pml_val:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
+
 #python:
 from gprMax.input_cmd_funcs import *
 import numpy as np
 
-# 1. Define Radii (10cm difference)
-r_tx = 1.10         # Inner radius for Transmitter
-r_rx = 1.20         # Outer radius for Receiver (10cm further out)
-
-# 2. Domain Center
+# 1. Configuration: 5cm radial distance between circles
+r_tx = 1.10         # Inner circle radius
+r_rx = 1.15         # Outer circle radius (5cm distance)
 cx = {domain_3d[0]} / 2
 cz = {domain_3d[2]} / 2
 
-# 3. Calculate current position based on the run number
+# 2. Position Calculation
 total_runs = {self.num_scan}
 angle_rad = (2 * np.pi * (current_model_run - 1)) / total_runs
 
-# Tx Position (Inner Circle)
-tx_x = cx + r_tx * np.cos(angle_rad)
-tx_z = cz + r_tx * np.sin(angle_rad)
-
-# Rx Position (Outer Circle - aligned with Tx angle)
-rx_x = cx + r_rx * np.cos(angle_rad)
-rx_z = cz + r_rx * np.sin(angle_rad)
-
-# 4. Height and Polarization
-# Keeping 'z' as discussed for horizontal root detection
+tx_x, tx_z = cx + r_tx * np.cos(angle_rad), cz + r_tx * np.sin(angle_rad)
+rx_x, rx_z = cx + r_rx * np.cos(angle_rad), cz + r_rx * np.sin(angle_rad)
 antenna_y = 1.20 + (2 * {self.resol})
 
+# 3. ROTATING (TANGENTIAL) POLARIZATION
+# Calculate tangential unit vector: (-sin(theta), cos(theta))
+vx = -np.sin(angle_rad)
+vz = np.cos(angle_rad)
+
+# Define antenna length (e.g., 0.01m) to create the vector
+dl = 0.01 
+
 waveform('gaussian', 1, 5e8, 'my_gaussian')
-hertzian_dipole('z', tx_x, antenna_y, tx_z, 'my_gaussian')
+
+# Using 'dipole' to allow non-axial (rotated) orientation
+# Syntax: dipole(direction, x1, y1, z1, x2, y2, z2, waveform)
+dipole('z', tx_x, antenna_y, tx_z, tx_x + (vx * dl), antenna_y, tx_z + (vz * dl), 'my_gaussian')
 rx(rx_x, antenna_y, rx_z)
 #end_python:
+
 #material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
 #box: {pml_val:.3f} 1.100 {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.200 {domain_3d[2] - pml_val:.3f} confined_material
 #geometry_objects_read: {(domain_3d[0]/2 - self.x/2):.3f} {domain_3d[1]/2 - self.y/2 - 0.25:.3f} {(domain_3d[2]/2 - self.z/2):.3f} {self.h5_file} {self_mat_file}
