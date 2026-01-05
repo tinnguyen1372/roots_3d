@@ -38,22 +38,15 @@ class Roots_Func():
         self.input = 'circular_scan.in'
         pml_cells = 20
         pml_val = self.resol * pml_cells
-
-        # Define the simulation domain
         sharp_domain = [3.0, 1.5, 3.0]
-        domain_3d = [
-            float(sharp_domain[0] + 2 * pml_val), 
-            float(sharp_domain[1] + 2 * pml_val), 
-            float(sharp_domain[2] + 2 * pml_val)
-        ]
+        domain_3d = [float(d + 2 * pml_val) for d in sharp_domain]
 
-        # Generate material file
         self_mat_file = 'Object_materials.txt'
         with open(self_mat_file, 'w') as f:
             for i in range(len(self.roots_permittivity)):
                 f.write(f'#material: {self.roots_permittivity[i]} {self.roots_conductivity[i]} 1 0 Object{i}\n')
 
-        config = f'''#title: Circular Root Scan
+        config = f'''#title: Stationary Antenna - Array Rotation
 #domain: {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f}
 #dx_dy_dz: {self.resol} {self.resol} {self.resol}
 #time_window: {self.time_window}
@@ -63,51 +56,58 @@ material: 5.24 0.001 1 0 hete_soil
 soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
 fractal_box: {pml_val:.3f} {pml_val:.3f} {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.1 {domain_3d[2] - pml_val:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
 
+#waveform: gaussian 1 5e8 wave_z
+
 #python:
 import numpy as np
-from gprMax.input_cmd_funcs import rx, waveform
+import h5py
+from scipy.ndimage import rotate
+from gprMax.input_cmd_funcs import rx
 
-# 1. Geometry: 5cm radial distance
-r_tx = 1.10         
-r_rx = 1.15         
-cx = {domain_3d[0]} / 2
-cz = {domain_3d[2]} / 2
-
-# 2. Position and Angle
-total_runs = {self.num_scan}
-angle_rad = (2 * np.pi * (current_model_run - 1)) / total_runs
-
-tx_x, tx_z = cx + r_tx * np.cos(angle_rad), cz + r_tx * np.sin(angle_rad)
-rx_x, rx_z = cx + r_rx * np.cos(angle_rad), cz + r_rx * np.sin(angle_rad)
+# 1. FIXED ANTENNA (Stationary at 0 degrees)
+cx, cz = {domain_3d[0]/2}, {domain_3d[2]/2}
+tx_x, tx_z = cx + 1.10, cz
+rx_x, rx_z = cx + 1.15, cz
 antenna_y = 1.20 + (2 * {self.resol})
 
-# 3. Tangential Vector (Turning)
-vx = -np.sin(angle_rad)
-vz = np.cos(angle_rad)
-
-# 4. Correct Waveform usage
-# We must use TWO waveforms to rotate the vector correctly
-waveform('gaussian', vx, 5e8, 'wave_x')
-waveform('gaussian', vz, 5e8, 'wave_z')
-
-# 5. Polarization injection
-# Any print() in a python block is treated as a gprMax command
-if abs(vx) > 1e-5:
-    print(f'#hertzian_dipole: x {{tx_x:.4f}} {{antenna_y:.4f}} {{tx_z:.4f}} wave_x')
-if abs(vz) > 1e-5:
-    print(f'#hertzian_dipole: z {{tx_x:.4f}} {{antenna_y:.4f}} {{tx_z:.4f}} wave_z')
-
-# Receiver records ALL components (Ex, Ey, Ez) by default
+print(f'#hertzian_dipole: z {{tx_x:.4f}} {{antenna_y:.4f}} {{tx_z:.4f}} wave_z')
 rx(rx_x, antenna_y, rx_z)
+
+# 2. ARRAY ROTATION LOGIC
+total_runs = {self.num_scan}
+angle_deg = (360.0 * (current_model_run - 1)) / total_runs
+
+# Read the original array
+with h5py.File('{self.h5_file}', 'r') as f:
+    # Adjust 'data' to whatever your internal H5 dataset name is
+    original_vol = f['data'][()] 
+
+# Rotate around Y-axis (axes 0 and 2 represent X and Z in a 3D volume)
+# reshape=False ensures the dimensions stay the same as your domain expects
+rotated_vol = rotate(original_vol, angle_deg, axes=(0, 2), reshape=False, order=0)
+
+# Write to a run-specific temp file to avoid access errors
+temp_h5 = f'temp_run_{{current_model_run}}.h5'
+with h5py.File(temp_h5, 'w') as f:
+    f.create_dataset('data', data=rotated_vol)
+    f.attrs['dx_dy_dz'] = (0.005, 0.005, 0.005)
+
+# Place the rotated array in the domain
+root_x = {domain_3d[0]/2 - self.x/2}
+root_y = {domain_3d[1]/2 - self.y/2 - 0.25}
+root_z = {domain_3d[2]/2 - self.z/2}
+
+print(f'#geometry_objects_read: {{root_x:.3f}} {{root_y:.3f}} {{root_z:.3f}} {{temp_h5}} {self_mat_file}')
 #end_python:
 
 #material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
 #box: {pml_val:.3f} 1.100 {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.200 {domain_3d[2] - pml_val:.3f} confined_material
-#geometry_objects_read: {(domain_3d[0]/2 - self.x/2):.3f} {domain_3d[1]/2 - self.y/2 - 0.25:.3f} {(domain_3d[2]/2 - self.z/2):.3f} {self.h5_file} {self_mat_file}
-geometry_view: 0 0 0 {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f} {self.resol} {self.resol} {self.resol} CircularScan n
+geometry_view: 0 0 0 {domain_3d[0]:.3f} {domain_3d[1]:.3f} {domain_3d[2]:.3f} {self.resol} {self.resol} {self.resol} RotatingScan n
 '''
         with open(self.input, 'w') as f:
             f.write(config)
+
+        api(self.input, n=int(self.num_scan), gpu=[0], geometry_fixed=False)
 
         # Run the simulation
         api(self.input, 
