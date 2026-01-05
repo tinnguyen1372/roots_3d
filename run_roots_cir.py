@@ -61,29 +61,39 @@ class Roots_Func():
 #time_window: {self.time_window}
 #pml_cells: {pml_cells}
 
-#material: 5.24 0.001 1 0 hete_soil
+material: 5.24 0.001 1 0 hete_soil
 soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
 fractal_box: {pml_val:.3f} {pml_val:.3f} {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.1 {domain_3d[2] - pml_val:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
 #python:
 from gprMax.input_cmd_funcs import *
 import numpy as np
 
-r_ant = 1.10
-cx, cz = {domain_3d[0]}/2, {domain_3d[2]}/2
+# 1. Define Radii (10cm difference)
+r_tx = 1.10         # Inner radius for Transmitter
+r_rx = 1.20         # Outer radius for Receiver (10cm further out)
+
+# 2. Domain Center
+cx = {domain_3d[0]} / 2
+cz = {domain_3d[2]} / 2
+
+# 3. Calculate current position based on the run number
 total_runs = {self.num_scan}
+angle_rad = (2 * np.pi * (current_model_run - 1)) / total_runs
 
-# Angle for this specific step
-angle_tx = (2 * np.pi * (current_model_run - 1)) / total_runs
-# Offset Rx by about 10cm along the arc to avoid overlap
-angle_rx = angle_tx + (0.10 / r_ant) 
+# Tx Position (Inner Circle)
+tx_x = cx + r_tx * np.cos(angle_rad)
+tx_z = cz + r_tx * np.sin(angle_rad)
 
-tx_x, tx_z = cx + r_ant * np.cos(angle_tx), cz + r_ant * np.sin(angle_tx)
-rx_x, rx_z = cx + r_ant * np.cos(angle_rx), cz + r_ant * np.sin(angle_rx)
+# Rx Position (Outer Circle - aligned with Tx angle)
+rx_x = cx + r_rx * np.cos(angle_rad)
+rx_z = cz + r_rx * np.sin(angle_rad)
+
+# 4. Height and Polarization
+# Keeping 'z' as discussed for horizontal root detection
 antenna_y = 1.20 + (2 * {self.resol})
 
 waveform('gaussian', 1, 5e8, 'my_gaussian')
-# Use 'z' as it is the best supported horizontal polarization
-hertzian_dipole('y', tx_x, antenna_y, tx_z, 'my_gaussian')
+hertzian_dipole('z', tx_x, antenna_y, tx_z, 'my_gaussian')
 rx(rx_x, antenna_y, rx_z)
 #end_python:
 #material: {self.confined_permittivity} {self.confined_conductivity} 1 0 confined_material
