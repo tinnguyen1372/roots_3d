@@ -70,7 +70,7 @@ tx_x, tx_z = cx + 1.10, cz
 rx_x, rx_z = cx + 1.15, cz
 antenna_y = 1.20 + (2 * {self.resol})
 
-print(f'#hertzian_dipole: y {{tx_x:.4f}} {{antenna_y:.4f}} {{tx_z:.4f}} wave_z')
+print(f'#hertzian_dipole: z {{tx_x:.4f}} {{antenna_y:.4f}} {{tx_z:.4f}} wave_z')
 rx(rx_x, antenna_y, rx_z)
 
 # 2. ARRAY ROTATION LOGIC
