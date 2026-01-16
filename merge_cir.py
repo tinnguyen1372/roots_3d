@@ -20,7 +20,7 @@ data = None  # Initialize as None so we can handle the first file easily
 for output_file in output_files:
     
     with h5py.File(output_file, 'r') as f1:
-        data1 = f1['rxs']['rx1']['Ez'][()]
+        data1 = f1['rxs']['rx1']['Ey'][()]
         print(data1.shape)
         dt = f1.attrs['dt']
     # data1 = process_br(data1)

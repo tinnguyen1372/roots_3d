@@ -56,7 +56,7 @@ material: 5.24 0.001 1 0 hete_soil
 soil_peplinski: 0.3 0.7 2 2.66 0.01 0.15 hete_soil
 fractal_box: {pml_val:.3f} {pml_val:.3f} {pml_val:.3f} {domain_3d[0] - pml_val:.3f} 1.1 {domain_3d[2] - pml_val:.3f} 1.5 1 1 1 20 hete_soil my_fractal_box {self.fractal_box_seed}
 
-#waveform: gaussian 1 5e8 wave_z
+#waveform: gaussian 1 1e9 wave_z
 
 #python:
 import numpy as np
