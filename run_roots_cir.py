@@ -87,8 +87,8 @@ vz = np.cos(angle_rad)
 
 # 4. Correct Waveform usage
 # We must use TWO waveforms to rotate the vector correctly
-waveform('gaussian', vx, 5e8, 'wave_x')
-waveform('gaussian', vz, 5e8, 'wave_z')
+waveform('gaussian', vx, 1e9, 'wave_x')
+waveform('gaussian', vz, 1e9, 'wave_z')
 
 # 5. Polarization injection
 # Any print() in a python block is treated as a gprMax command
